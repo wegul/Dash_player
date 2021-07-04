@@ -2,55 +2,57 @@
 <html lang="en">
 <head>
     <title>Dash</title>
-    <style>
-        video {
-            width: 1000px;
-            height: 618px;
-        }
-    </style>
+    <script src="./DASH.js"></script>
+    <p><a>this is video player page</a></p>
+    <div>
+        <video controls id="videoPlayer"></video>
+        <style>
+            video {
+                width: 1000px;
+                height: 618px;
+            }
+        </style>
+    </div>
+
+
+
+
+
+<!--    <script>-->
+<!--        (function(){-->
+<!--            // var url = "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd";-->
+<!--            // var url ="https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";-->
+<!--            var url ='./bbb_30fps/bbb_30fps.mpd';-->
+<!--            var player = dashjs.MediaPlayer().create();-->
+<!--            player.initialize(document.querySelector("#videoPlayer"), url, true);-->
+<!--        })();-->
+<!--    </script>-->
+    <script class="code" src="./LowestBitrateRule.js"></script>
+    <script class="code">
+        (function init() {
+            var video,
+                player,
+                url = "./bbb_30fps/bbb_30fps.mpd";
+
+            video = document.querySelector("#videoPlayer");
+            player = dashjs.MediaPlayer().create();
+
+            /* don't use dash.js default rules */
+            player.updateSettings({
+                'streaming': {
+                    'abr': {
+                        'useDefaultABRRules': false
+                    }
+                }
+            });
+
+            /* add my custom quality switch rule. Look at LowestBitrateRule.js to know more */
+            /* about the structure of a custom rule */
+            player.addABRCustomRule('qualitySwitchRules', 'LowestBitrateRule', LowestBitrateRule);
+
+            player.initialize(video, url, true);
+        })();
+    </script>
 </head>
 
-<body>
-<p><a>this is video player page</a></p>
-<!--<div>-->
-<!--    <video id="videoPlayer" controls src="./bbb_30fps/bbb_30fps.mpd"></video>-->
-<!--  <video id="videoPlayer" controls src="https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"></video>-->
-<!--</div>-->
-<!--<script src="./DASH.js"></script>-->
-<!--<script>-->
-<!--    (function(){-->
-<!--        // var url = "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd";-->
-<!--        // var url ="https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";-->
-<!--        var url ='./bbb_30fps/bbb_30fps.mpd';-->
-<!--        var player = dashjs.MediaPlayer().create();-->
-<!--        player.initialize(document.querySelector("#videoPlayer"), url, true);-->
-<!--    })();-->
-<!--</script>-->
-<!--<script src="LowestBitrateRule.js"></script>-->
-<!--<script>-->
-<!--    function init() {-->
-<!--        var video,-->
-<!--            player,-->
-<!--            // url = "./bbb_30fps/bbb_30fps.mpd";-->
-
-<!--        video = document.querySelector("video");-->
-<!--        player = dashjs.MediaPlayer().create();-->
-
-<!--        /* don't use dash.js default rules */-->
-<!--        player.updateSettings({-->
-<!--            'streaming': {-->
-<!--                'abr': {-->
-<!--                    'useDefaultABRRules': false-->
-<!--                }-->
-<!--            }-->
-<!--        });-->
-
-<!--        /* add my custom quality switch rule. Look at LowestBitrateRule.js to know more */-->
-<!--        /* about the structure of a custom rule */-->
-<!--        player.addABRCustomRule('qualitySwitchRules', 'LowestBitrateRule', LowestBitrateRule);-->
-
-<!--        player.initialize(video, url, true);-->
-<!--    }-->
-<!--</script>-->
-</body>
 </html>
