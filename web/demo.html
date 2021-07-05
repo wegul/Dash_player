@@ -5,7 +5,7 @@
     <script src="./DASH.js"></script>
     <p><a>this is video player page</a></p>
     <div>
-        <video controls id="videoPlayer"></video>
+        <video controls id="videoPlayer" loop="loop"></video>
         <style>
             video {
                 width: 1000px;
@@ -48,6 +48,7 @@
             player.addABRCustomRule('qualitySwitchRules', 'LowestBitrateRule', LowestBitrateRule);
 
             player.initialize(video, url, true);
+
         })();
     </script>
 </head>

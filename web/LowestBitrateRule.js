@@ -46,20 +46,27 @@ function LowestBitrateRuleClass() {
 
     // Always use lowest bitrate
     function getMaxIndex(rulesContext) {
-        // here you can get some informations aboit metrics for example, to implement the rule
+        // here you can get some informations about metrics for example, to implement the rule
         let metricsModel = MetricsModel(context).getInstance();
         var mediaType = rulesContext.getMediaInfo().type;
         var metrics = metricsModel.getMetricsFor(mediaType, true);
 
+
         // A smarter (real) rule could need analyze playback metrics to take
         // bitrate switching decision. Printing metrics here as a reference
-        console.log(metrics);
+        // console.log(metrics);
+
 
         // Get current bitrate
         let streamController = StreamController(context).getInstance();
         let abrController = rulesContext.getAbrController();
         let current = abrController.getQualityFor(mediaType, streamController.getActiveStreamInfo());
 
+        let mediaInfo = rulesContext.getMediaInfo();
+        let throughput = abrController.getThroughputHistory().getAverageThroughput(mediaType);
+        let timeStamp = 0;
+
+        console.log({"metrics": metrics, "throughput": throughput, "timestamp": timeStamp});
         // If already in lowest bitrate, don't do anything
         if (current === 0) {
             return SwitchRequest(context).create();
