@@ -77,6 +77,10 @@ function LowestBitrateRuleClass() {
         switchRequest.quality = 0;
         switchRequest.reason = 'Always switching to the lowest bitrate';
         switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
+
+        let bufferRequest = Buffer
+
+
         return switchRequest;
     }
 
