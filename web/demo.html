@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Dash</title>
-    <script src="./DASH.js"></script>
+    <script src="js_files/DASH.js"></script>
     <p><a>this is video player page</a></p>
     <div>
         <video controls id="videoPlayer" loop="loop"></video>
@@ -24,7 +24,7 @@
 <!--            player.initialize(document.querySelector("#videoPlayer"), url, true);-->
 <!--        })();-->
 <!--    </script>-->
-    <script class="code" src="./LowestBitrateRule.js"></script>
+    <script class="code" src="js_files/LowestBitrateRule.js"></script>
     <script class="code">
         (function init() {
             var video,
@@ -38,7 +38,8 @@
             player.updateSettings({
                 'streaming': {
                     'abr': {
-                        'useDefaultABRRules': false
+                        'useDefaultABRRules': false,
+                        'initialBitrate': {audio: -1, video: 1000}
                     }
                 }
             });
