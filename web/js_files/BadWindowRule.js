@@ -8,7 +8,6 @@ function BadWindowRuleClass() {
     let MetricsModel = factory.getSingletonFactoryByName('MetricsModel');
     let StreamController = factory.getSingletonFactoryByName('StreamController');
     let DashMetrics = factory.getSingletonFactoryByName('DashMetrics');
-    let ScheduleController = factory.getClassFactoryByName('ScheduleController');
     let Settings = factory.getSingletonFactoryByName('Settings');
     let context = this.context;
     let timeStart;
