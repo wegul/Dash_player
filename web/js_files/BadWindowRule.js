@@ -8,12 +8,14 @@ function BadWindowRuleClass() {
     let MetricsModel = factory.getSingletonFactoryByName('MetricsModel');
     let StreamController = factory.getSingletonFactoryByName('StreamController');
     let DashMetrics = factory.getSingletonFactoryByName('DashMetrics');
+    let ScheduleController = factory.getClassFactoryByName('ScheduleController');
     let context = this.context;
-    let timeSpan = -1;
+    let timeStart;
+    let badWndBufferTarget = 88;
     let instance;
 
-    function setup(time) {
-        timeSpan = time;
+    function setup() {
+        timeStart = new Date().getTime();
     }
 
     // Always use lowest bitrate
@@ -21,12 +23,14 @@ function BadWindowRuleClass() {
         // here you can get some informations aboit metrics for example, to implement the rule
         let metricsModel = MetricsModel(context).getInstance();
         let dashMetrics = DashMetrics(context).getInstance();
+        let scheduleController = ScheduleController(context).create();
         let mediaType = rulesContext.getMediaInfo().type;
-        let metrics = metricsModel.getMetricsFor(mediaType, true);
+
+        // console.log(scheduleController);
         let bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType);
+
         // A smarter (real) rule could need analyze playback metrics to take
         // bitrate switching decision. Printing metrics here as a reference
-        console.log({"buflev": bufferLevel});
 
 
         // Get current bitrate
@@ -34,16 +38,32 @@ function BadWindowRuleClass() {
         let abrController = rulesContext.getAbrController();
         let current = abrController.getQualityFor(mediaType, streamController.getActiveStreamInfo().id);
 
+        const streamInfo = rulesContext.getStreamInfo();
+        const isDynamic = streamInfo && streamInfo.manifestInfo ? streamInfo.manifestInfo.isDynamic : null;
+        const throughputHistory = abrController.getThroughputHistory();
+        const throughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
+
+
+        console.log({
+            "timestamp": (new Date().getTime() - timeStart) / 1000,
+            "buflev": bufferLevel,
+            "throughput kbits/s": throughput
+        });
+
         // If already in lowest bitrate, don't do anything
-        if (timeSpan > 0 || current === 0) {
+        if (badWndBufferTarget < 0 || current === 0) {
             let sr = SwitchRequest(context).create();
             return sr;
             // return SwitchRequest(context).create();
         }
 
-        // Ask to fulfill the buffer
+        // Ask to fulfill the buffer according to badWndBufferTarget
+
+        // scheduleController.setBufferTarget(badWndBufferTarget);
+        // console.log({'target':scheduleController.getBufferTarget()});
+
         let switchRequest = SwitchRequest(context).create();
-        switchRequest.quality = 0;//-1 is no change
+        switchRequest.quality = 1;//-1 is no change
         switchRequest.reason = 'bad window in coming';
         switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
         return switchRequest;
@@ -59,5 +79,5 @@ function BadWindowRuleClass() {
 }
 
 BadWindowRuleClass.__dashjs_factory_name = 'BadWindowRule';
-BadWindowRule = dashjs.FactoryMaker.getClassFactory(BadWindowRuleRuleClass);
+BadWindowRule = dashjs.FactoryMaker.getClassFactory(BadWindowRuleClass);
 

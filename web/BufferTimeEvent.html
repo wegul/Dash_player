@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <title>Dash with BufferTime</title>
-    <script src="./js_files/DASH.js"></script>
+    <script src="./js_files/DASHv4.js"></script>
     <script src="js_files/BadWindowRule.js"></script>
     <p>
-        <a>this is a dash video player page with buffer time rule enabled</a>
+        <a>this is a dash video player page with BadWindowRule enabled</a>
     </p>
 </head>
 <body>
@@ -37,7 +37,13 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
         player.updateSettings({
             'streaming': {
                 'abr': {
-                    'useDefaultABRRules': true
+                    'useDefaultABRRules': false
+                },
+                'buffer': {
+                    'bufferTimeAtTopQuality': 30,
+                    'bufferTimeAtTopQualityLongForm': 60,
+                    'stableBufferTime': 20,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
+                    'longFormContentDurationThreshold': 60,
                 }
             }
         });

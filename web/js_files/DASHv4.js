@@ -42944,6 +42944,7 @@ if (undefined === atob) {
                     var instance, streamInfo, logger, currentRepresentationInfo, timeToLoadDelay, scheduleTimeout,
                         hasVideoTrack, lastFragmentRequest, topQualityIndex, lastInitializedQuality, switchTrack,
                         initSegmentRequired, checkPlaybackQuality;
+                    var manualBufferTarget = -1;
 
                     function setup() {
                         logger = Object(_core_Debug__WEBPACK_IMPORTED_MODULE_5__["default"])(context).getInstance().getLogger(instance);
@@ -43102,6 +43103,8 @@ if (undefined === atob) {
                      * Check if the current buffer level is below our buffer target.
                      * @return {boolean}
                      * @private
+                     *
+                     * @override by wegul: added "return bufferLevel < max(getBufferTarget(),manualBufferTarget);"
                      */
 
 
@@ -43112,7 +43115,29 @@ if (undefined === atob) {
 
                         var bufferLevel = dashMetrics.getCurrentBufferLevel(type);
                         return bufferLevel < getBufferTarget();
+
+                        // return bufferLevel < Math.max(getBufferTarget(),manualBufferTarget);
                     }
+
+                    /**
+                     * Manually set manualBufferTarget in order to post buffer request (only for BadWindowRule)
+                     * @return {number}
+                     * @author wegul
+                     */
+                    // //TODO: this is wegul's work
+                    // function setBufferTarget(target) {
+                    //     if (!type || !currentRepresentationInfo) {
+                    //         return true;
+                    //     }
+                    //     let bufferTarget=getBufferTarget();
+                    //     let bufferLevel = dashMetrics.getCurrentBufferLevel(type);
+                    //     if (bufferLevel<target || bufferTarget<target) {
+                    //         manualBufferTarget=target;
+                    //     }
+                    //
+                    //     return manualBufferTarget;
+                    // }
+
 
                     /**
                      * Determine the buffer target depending on the type and whether we have audio and video AdaptationSets available
@@ -43126,13 +43151,19 @@ if (undefined === atob) {
                         if (!type || !currentRepresentationInfo) {
                             return bufferTarget;
                         }
-
+                        //TODO: added by wegul
+                        // if(manualBufferTarget>0){
+                        //     bufferTarget=manualBufferTarget;
+                        //     return bufferTarget;
+                        // }
                         if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) {
                             bufferTarget = _getBufferTargetForFragmentedText();
                         } else if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO && hasVideoTrack) {
                             bufferTarget = _getBufferTargetForAudio();
                         } else {
                             bufferTarget = _getGenericBufferTarget();
+
+
                         }
 
                         return bufferTarget;
@@ -43361,7 +43392,6 @@ if (undefined === atob) {
                 ScheduleController.__dashjs_factory_name = 'ScheduleController';
                 /* harmony default export */
                 __webpack_exports__["default"] = (_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_4__["default"].getClassFactory(ScheduleController));
-
                 /***/
             }),
 
