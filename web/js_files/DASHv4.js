@@ -19438,11 +19438,15 @@ if (undefined === atob) {
                     return instance;
                 }
 
+                // Settings.__dashjs_factory_name = 'Settings';
+                // var factory = _FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].getSingletonFactory(Settings);
+                // /* harmony default export */
+                // __webpack_exports__["default"] = (factory);
+                //TODO: changed by wegul
                 Settings.__dashjs_factory_name = 'Settings';
                 var factory = _FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].getSingletonFactory(Settings);
-                /* harmony default export */
+                _FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].updateSingletonFactory(Settings.__dashjs_factory_name, factory);
                 __webpack_exports__["default"] = (factory);
-
                 /***/
             }),
 

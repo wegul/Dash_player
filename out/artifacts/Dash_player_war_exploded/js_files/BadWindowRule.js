@@ -8,12 +8,27 @@ function BadWindowRuleClass() {
     let MetricsModel = factory.getSingletonFactoryByName('MetricsModel');
     let StreamController = factory.getSingletonFactoryByName('StreamController');
     let DashMetrics = factory.getSingletonFactoryByName('DashMetrics');
-    let ScheduleController = factory.getClassFactoryByName('ScheduleController');
     let Settings = factory.getSingletonFactoryByName('Settings');
+    // let Settings =factory.getSingletonFactory(Settings)
+    // Object(_core_Settings__WEBPACK_IMPORTED_MODULE_28__["default"])(context).getInstance();
     let context = this.context;
     let timeStart;
-    let badWndBufferTarget = 88;
     let instance;
+/*
+    AbrController.__dashjs_factory_name = 'AbrController';
+                var factory = _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_7__["default"].getSingletonFactory(AbrController);
+                factory.QUALITY_DEFAULT = QUALITY_DEFAULT;
+                _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_7__["default"].updateSingletonFactory(AbrController.__dashjs_factory_name, factory);
+
+    __webpack_exports__["default"] = (factory)
+
+
+    Settings.__dashjs_factory_name = 'Settings';
+                var factory = _FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].getSingletonFactory(Settings);
+                _FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].updateSingletonFactory(Settomgs.__dashjs_factory_name, factory);
+
+    __webpack_exports__["default"] = (factory);
+        */
 
     function setup() {
         timeStart = new Date().getTime();
@@ -24,10 +39,14 @@ function BadWindowRuleClass() {
         // get controllers
         let metricsModel = MetricsModel(context).getInstance();
         let dashMetrics = DashMetrics(context).getInstance();
-        let settings = Settings.getInstance();
+        let settings = Settings(context).getInstance().get();
         let mediaType = rulesContext.getMediaInfo().type;
         let streamController = StreamController(context).getInstance();
         let abrController = rulesContext.getAbrController();
+
+        // get info
+        const streamInfo = rulesContext.getStreamInfo();
+        const isDynamic = streamInfo && streamInfo.manifestInfo ? streamInfo.manifestInfo.isDynamic : null;
 
         // get metrics
         const bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType);
@@ -35,19 +54,20 @@ function BadWindowRuleClass() {
         const throughputHistory = abrController.getThroughputHistory();
         const throughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
 
-        // get info
-        const streamInfo = rulesContext.getStreamInfo();
-        const isDynamic = streamInfo && streamInfo.manifestInfo ? streamInfo.manifestInfo.isDynamic : null;
+        // If already in lowest bitrate or no bad window approaching, don't do anything
+        const targetBufferLevel=settings.streaming.buffer.stableBufferTime;
 
 
         console.log({
             "timestamp": (new Date().getTime() - timeStart) / 1000,
-            "buflev": bufferLevel,
-            "throughput kbits/s": throughput
+            "BS set":'unknown',
+            "current throughput kbits/s": throughput,
+            "historical throughput":'unknown',
+            "current buflev": bufferLevel,
+            "target buflev":targetBufferLevel
         });
 
-        // If already in lowest bitrate or no bad window approaching, don't do anything
-        if (badWndBufferTarget < 0 || current === 0) {
+        if (targetBufferLevel <= 0 || current === 0) {
             let sr = SwitchRequest(context).create();
             return sr;
             // return SwitchRequest(context).create();
@@ -55,11 +75,8 @@ function BadWindowRuleClass() {
 
         // Ask to fulfill the buffer according to stable buffer time aka targetBufferLevel
 
-        const targetBufferLevel=settings.getBufferTarget();
-        console.log({'target':targetBufferLevel});
-
         let switchRequest = SwitchRequest(context).create();
-        switchRequest.quality = 1;//-1 is no change
+        switchRequest.quality = 8;//-1 is no change
         switchRequest.reason = 'bad window in coming';
         switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
         return switchRequest;
