@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head align="center">
     <title>Dash with BufferTime</title>
     <script src="js_files/DASHv4.js"></script>
     <script src="js_files/BadWindowRule.js"></script>
@@ -8,14 +8,16 @@
         <a>this is a dash video player page with BadWindowRule enabled</a>
     </p>
 </head>
+
 <body>
-<input type="text" name="time left for bad window" id="timeSpan" align="center"> time left for bad window </input> <br/>
-<input type="text" name="bad window length" id="wndwlength"> bad window length </input> <br/>
-<button type="Submit">Submit</button>
+<input id="ETA" name="time left for bad window" type="number"> time left for bad window </input> <br/>
+<input id="BADWNDLENGTH" name="bad window length" type="number"> bad window length </input> <br/>
+<button onclick="updatePlayerSettings()" type="submit">Submit</button>
+
 <!--once a user clicked the button, indicating an incoming of a bad window, it triggers the event of BadWindowRule that
 the player needs to rectify the Quality and BufferLevel depending on historical throughput and window length -->
-<div>
-    <video controls id="videoPlayer" loop="loop" autoplay="autoplay"></video>
+<div align="center">
+    <video autoplay="autoplay" controls id="videoPlayer" loop="loop"></video>
     <style>
         video {
             width: 1000px;
@@ -24,35 +26,87 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
     </style>
 </div>
 
-<script>
-    (function init() {
-        var video,
-            player,
-            url = "./bbb_30fps/bbb_30fps.mpd";
+<div align="center">
+    <table border="1" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th> timestamp</th>
+            <th> BS set</th>
+            <th> current throughput kbits/s</th>
+            <th> historical throughput</th>
+            <th> current buflev</th>
+            <th> target buflev</th>
+            <th> target quality</th>
+        </tr>
+        </thead>
+        <tbody align="center" id="tbMain">
+        <tr>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>default 3000.5 kbps</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
-        video = document.querySelector("#videoPlayer");
-        player = dashjs.MediaPlayer().create();
-        /* don't use dash.js default rules */
+
+<script>
+    //TODO: is window.onload necessary?
+    // (function init() {
+    var video,
+        player,
+        url = "./bbb_30fps/bbb_30fps.mpd";
+
+    video = document.querySelector("#videoPlayer");
+    player = dashjs.MediaPlayer().create();
+    /* everything is fine until bad window comes. So use default rules until submit event*/
+    player.updateSettings({
+        'streaming': {
+            'abr': {
+                'useDefaultABRRules': true
+            },
+            'buffer': {
+                'bufferTimeAtTopQuality': 5,
+                'bufferTimeAtTopQualityLongForm': 5,
+                'stableBufferTime': 5,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
+                'longFormContentDurationThreshold': 5,
+            }
+        }
+    });
+    player.addABRCustomRule('qualitySwitchRules', 'BadWindowRule', BadWindowRule);
+    player.initialize(video, url, true);
+
+    // })();
+</script>
+<script>
+    function updatePlayerSettings() {
+        const eta = parseFloat(document.getElementById('ETA').value);
+        const wndLen = parseFloat(document.getElementById('BADWNDLENGTH').value);
+        console.log({eta, wndLen});
+
+        /* add my custom quality switch rule. Look at LowestBitrateRule.js to know more */
+        /* about the structure of a custom rule */
+
         player.updateSettings({
             'streaming': {
                 'abr': {
                     'useDefaultABRRules': false
                 },
                 'buffer': {
-                    'bufferTimeAtTopQuality': 30,
-                    'bufferTimeAtTopQualityLongForm': 60,
-                    'stableBufferTime': 20,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
-                    'longFormContentDurationThreshold': 60,
+                    'bufferTimeAtTopQuality': eta + wndLen,
+                    'bufferTimeAtTopQualityLongForm': eta + wndLen,
+                    'stableBufferTime': eta + wndLen,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
+                    'longFormContentDurationThreshold': eta + wndLen,
+                    'badWindowLength': wndLen
                 }
             }
         });
 
-        /* add my custom quality switch rule. Look at LowestBitrateRule.js to know more */
-        /* about the structure of a custom rule */
-        player.addABRCustomRule('qualitySwitchRules', 'BadWindowRule', BadWindowRule);
-        player.initialize(video, url, true);
-
-    })();
+    }
 </script>
 
 </body>

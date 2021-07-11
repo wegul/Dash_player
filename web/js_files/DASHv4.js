@@ -19262,7 +19262,9 @@ if (undefined === atob) {
                                 longFormContentDurationThreshold: 600,
                                 stallThreshold: 0.3,
                                 useAppendWindow: true,
-                                setStallState: true
+                                setStallState: true,
+                                //TODO: added by wegul
+                                badWindowLength: -1
                             },
                             gaps: {
                                 jumpGaps: true,
