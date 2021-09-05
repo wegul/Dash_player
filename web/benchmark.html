@@ -2,22 +2,21 @@
 <html lang="en">
 <head align="center">
     <title>Dash with BufferTime</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
     <script src="js_files/DASHv4.js"></script>
     <script src="js_files/Throughput_prediction_rule.js"></script>
+    <script src="js_files/FileSaver.js"></script>
+    <script src="js_files/tableExport.js"></script>
+    <script src="js_files/WriteExcel.js"></script>
     <p>
-        <a>this is a dash video player page with BadWindowRule enabled</a>
+        <a>this is a dash video player page with MPC</a>
     </p>
 </head>
 
 <body>
-<!--<input id="ETA" name="time left for bad window" type="number"> time left for bad window </input> <br/>-->
-<!--<input id="BADWNDLENGTH" name="bad window length" type="number"> bad window length </input> <br/>-->
-<!--<button onclick="updatePlayerSettings()" type="submit">Submit</button>-->
 
-<!--once a user clicked the button, indicating an incoming of a bad window, it triggers the event of BadWindowRule that
-the player needs to rectify the Quality and BufferLevel depending on historical throughput and window length -->
 <div align="center">
-    <video autoplay="autoplay" controls="true" id="videoPlayer" loop="loop"></video>
+    <video preload="none" controls="true" id="videoPlayer" loop="loop"></video>
     <style>
         video {
             width: 1000px;
@@ -27,7 +26,8 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
 </div>
 
 <div align="center">
-    <table border="1" cellpadding="0" cellspacing="0">
+    <button onClick='generateCSV()' type="submit">Export to CSV</button>
+    <table border="1" cellpadding="0" cellspacing="0" id="tbMain">
         <thead>
         <tr>
             <th> timestamp</th>
@@ -37,7 +37,7 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
             <th> bitrate choice</th>
         </tr>
         </thead>
-        <tbody align="center" id="tbMain">
+        <tbody align="center">
         <tr>
             <td>0</td>
             <!--            <td>0</td>-->
@@ -49,6 +49,7 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
         </tr>
         </tbody>
     </table>
+
 </div>
 
 
@@ -83,35 +84,18 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
         }
     });
     player.addABRCustomRule('qualitySwitchRules', 'ThroughputPredictionRule', ThroughputPredictionRule);
-    player.initialize(video, url, true);
+    player.initialize(video, url, false);
     // })();
 </script>
+
 <script>
-    function updatePlayerSettings() {
-        const eta = parseFloat(document.getElementById('ETA').value);
-        const wndLen = parseFloat(document.getElementById('BADWNDLENGTH').value);
-        console.log({eta, wndLen});
-
-        /* add my custom quality switch rule. Look at LowestBitrateRule.js to know more */
-        /* about the structure of a custom rule */
-
-        player.updateSettings({
-            'streaming': {
-                'abr': {
-                    'useDefaultABRRules': false
-                },
-                'buffer': {
-                    'bufferTimeAtTopQuality': eta + wndLen,
-                    'bufferTimeAtTopQualityLongForm': eta + wndLen,
-                    'stableBufferTime': eta + wndLen,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
-                    'longFormContentDurationThreshold': eta + wndLen,
-                    'badWindowLength': wndLen
-                }
-            }
+    function generateCSV() {
+        $('#tbMain').tableExport({
+            type: 'csv',
         });
-
     }
 </script>
+
 
 </body>
 

@@ -3,21 +3,21 @@
 <head align="center">
     <title>Dash with BufferTime</title>
     <script src="js_files/DASHv4.js"></script>
-    <script src="js_files/BadWindowRule.js"></script>
+    <script src="js_files/Throughput_prediction_rule.js"></script>
     <p>
         <a>this is a dash video player page with BadWindowRule enabled</a>
     </p>
 </head>
 
 <body>
-<input id="ETA" name="time left for bad window" type="number"> time left for bad window </input> <br/>
-<input id="BADWNDLENGTH" name="bad window length" type="number"> bad window length </input> <br/>
-<button onclick="updatePlayerSettings()" type="submit">Submit</button>
+<!--<input id="ETA" name="time left for bad window" type="number"> time left for bad window </input> <br/>-->
+<!--<input id="BADWNDLENGTH" name="bad window length" type="number"> bad window length </input> <br/>-->
+<!--<button onclick="updatePlayerSettings()" type="submit">Submit</button>-->
 
 <!--once a user clicked the button, indicating an incoming of a bad window, it triggers the event of BadWindowRule that
 the player needs to rectify the Quality and BufferLevel depending on historical throughput and window length -->
 <div align="center">
-    <video autoplay="autoplay" controls id="videoPlayer" loop="loop"></video>
+    <video autoplay="autoplay" controls="true" id="videoPlayer" loop="loop"></video>
     <style>
         video {
             width: 1000px;
@@ -31,22 +31,20 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
         <thead>
         <tr>
             <th> timestamp</th>
-            <th> BS set</th>
-            <th> current throughput kbits/s</th>
+            <th> current throughput </th>
             <th> historical throughput</th>
-            <th> current buflev</th>
-            <th> target buflev</th>
-            <th> target quality</th>
+            <th> current buflev </th>
+            <th> bitrate choice </th>
         </tr>
         </thead>
         <tbody align="center" id="tbMain">
         <tr>
             <td>0</td>
-            <td>0</td>
+<!--            <td>0</td>-->
             <td>0</td>
             <td>default 3000.5 kbps</td>
             <td>0</td>
-            <td>0</td>
+<!--            <td>0</td>-->
             <td>0</td>
         </tr>
         </tbody>
@@ -67,19 +65,25 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
     player.updateSettings({
         'streaming': {
             'abr': {
-                'useDefaultABRRules': true
+                'useDefaultABRRules': false,
+                ABRStrategy: "abrThroughput",
+                additionalAbrRules: {
+                    insufficientBufferRule: false,
+                    switchHistoryRule: false,
+                    droppedFramesRule: false,
+                    abandonRequestsRule: false
+                }
             },
             'buffer': {
-                'bufferTimeAtTopQuality': 5,
-                'bufferTimeAtTopQualityLongForm': 5,
-                'stableBufferTime': 5,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
+                'bufferTimeAtTopQuality': 20,
+                'bufferTimeAtTopQualityLongForm': 20,
+                'stableBufferTime': 30,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
                 'longFormContentDurationThreshold': 5,
             }
         }
     });
-    player.addABRCustomRule('qualitySwitchRules', 'BadWindowRule', BadWindowRule);
+    player.addABRCustomRule('qualitySwitchRules', 'ThroughputPredictionRule', ThroughputPredictionRule);
     player.initialize(video, url, true);
-
     // })();
 </script>
 <script>
@@ -101,7 +105,7 @@ the player needs to rectify the Quality and BufferLevel depending on historical 
                     'bufferTimeAtTopQualityLongForm': eta + wndLen,
                     'stableBufferTime': eta + wndLen,//this is my guy!! to rectify buffer length, just update this param in seconds unit.
                     'longFormContentDurationThreshold': eta + wndLen,
-                    'badWindowLength':wndLen
+                    'badWindowLength': wndLen
                 }
             }
         });

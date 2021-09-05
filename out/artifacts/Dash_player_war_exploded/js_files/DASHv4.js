@@ -19262,7 +19262,9 @@ if (undefined === atob) {
                                 longFormContentDurationThreshold: 600,
                                 stallThreshold: 0.3,
                                 useAppendWindow: true,
-                                setStallState: true
+                                setStallState: true,
+                                //TODO: added by wegul
+                                badWindowLength: -1
                             },
                             gaps: {
                                 jumpGaps: true,
@@ -61819,14 +61821,17 @@ if (undefined === atob) {
 
 
 
-
+                //revised by wegul
                 function ThroughputRule(config) {
                     config = config || {};
+
                     var context = this.context;
                     var dashMetrics = config.dashMetrics;
                     var instance;
+                    let timeStart;
 
                     function setup() {
+                        timeStart = new Date().getTime();
                     }
 
                     function checkConfig() {
@@ -61856,6 +61861,7 @@ if (undefined === atob) {
                         var latency = throughputHistory.getAverageLatency(mediaType);
                         var useBufferOccupancyABR = rulesContext.useBufferOccupancyABR();
 
+
                         if (isNaN(throughput) || !currentBufferState || useBufferOccupancyABR) {
                             return switchRequest;
                         }
@@ -61870,7 +61876,15 @@ if (undefined === atob) {
                                 };
                             }
                         }
-
+                        // const infoLog = {
+                        //     timestamp: (new Date().getTime() - timeStart) / 1000,
+                        //     currentThroughput_kbits_ps: throughput,
+                        //     historicalThroughput: 'default',
+                        //     currentBuflev: bufferLevel,
+                        //     targetQuality: switchRequest.quality
+                        // }
+                        // console.log(infoLog);
+                        // fillTable(infoLog);
                         return switchRequest;
                     }
 
