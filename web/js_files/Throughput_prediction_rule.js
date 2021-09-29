@@ -10,13 +10,14 @@ function ThroughputPredictionRuleClass(config) {
     let context = this.context;
     let timeStart;
     let instance, logger;
-    let dashMetrics;
+    let dashMetrics, streamController;
 
     config = config || {};
 
 
     function setup() {
         dashMetrics = DashMetrics(context).getInstance();
+        streamController = StreamController(context).getInstance();
         timeStart = new Date().getTime();
     }
 
@@ -63,9 +64,8 @@ function ThroughputPredictionRuleClass(config) {
         // console.log(abrController.getAbandonmentStateFor(streamInfo.id,mediaType));
         if (abrController.getAbandonmentStateFor(streamInfo.id, mediaType) !== 'abandonload') {
             if (currentBufferState.state === 'bufferLoaded') {
-
+                switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
                 switchRequest.quality = abrController.getQualityForBitrate(mediaInfo, throughput, streamInfo.id, latency);
-
                 scheduleController.setTimeToLoadDelay(0);
                 // logger.debug('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), 'kbps');
                 switchRequest.reason = {throughput: throughput, latency: latency};
@@ -76,7 +76,7 @@ function ThroughputPredictionRuleClass(config) {
             currentThroughput_kbits_ps: throughput,
             historicalThroughput: 'default',
             currentBuflev: bufferLevel,
-            targetQuality: switchRequest.quality
+            targetQuality: abrController.getQualityFor(mediaType, streamController.getActiveStreamInfo().id)
         }
         console.log(infoLog);
         fillTable(infoLog);
