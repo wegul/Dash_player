@@ -14,7 +14,7 @@
 
     <style>
         video {
-            width: 80%;
+            width: 60%;
         }
 
         .dash-video-player {
@@ -25,10 +25,19 @@
     </style>
 
     <script class="code">
+        function fillTable(infoLog) {
+            let table = document.getElementById('tbMain'),
+                row = table.insertRow();
+            for (let t in infoLog) {
+                let cell = row.insertCell();
+                cell.innerText = infoLog[t];
+            }
+        }
         function init() {
             var video,
                 player,
                 url = "./bbb_30fps/bbb_30fps.mpd";
+            const timeStart = new Date().getTime();
 
             video = document.querySelector("video");
             player = dashjs.MediaPlayer().create();
@@ -56,10 +65,20 @@
                     }).frameRate;
 
 
-                    document.getElementById('bandwidth').innerText = throughput + " Kbps";
-                    document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
-                    document.getElementById('framerate').innerText = frameRate + " fps";
-                    document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
+                    // document.getElementById('bandwidth').innerText = throughput + " Kbps";
+                    // document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
+                    // document.getElementById('framerate').innerText = frameRate + " fps";
+                    // document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
+
+                    const infoLog = {
+                        timestamp: (new Date().getTime() - timeStart) / 1000,
+                        currentThroughput_kbits_ps: throughput,
+                        historicalThroughput: 'default',
+                        currentBuflev: bufferLevel,
+                        targetQuality: bitrate
+                    }
+                    fillTable(infoLog);
+
                 }
             }, 1000);
 
@@ -104,28 +123,60 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="p-5 border rounded-3">
-                    <h4>Metrics</h4>
-                    <div>
-                        <strong>Bandwidth:</strong>
-                        <span id="bandwidth"></span>
-                        <br/>
-                        <strong>Reported bitrate:</strong>
-                        <span id="reportedBitrate"></span>
-                        <br/>
-                        <strong>Buffer level:</strong>
-                        <span id="bufferLevel"></span>
-                        <div id="chrome-only">
-                            <strong>Calculated bitrate:</strong>
-                            <span id="calculatedBitrate"></span>
-                        </div>
-                        <strong>Framerate:</strong>
-                        <span id="framerate"></span>
-
-                    </div>
-                </div>
+            <div align="center">
+                <button onClick='generateCSV()' type="submit">Export to CSV</button>
+                <table border="1" cellpadding="0" cellspacing="0" id="tbMain">
+                    <thead>
+                    <tr>
+                        <th> timestamp</th>
+                        <th> current throughput</th>
+                        <th> historical throughput</th>
+                        <th> current buflev</th>
+                        <th> bitrate choice</th>
+                    </tr>
+                    </thead>
+                    <tbody >
+                    <tr>
+                        <td>0</td>
+                        <!--            <td>0</td>-->
+                        <td>0</td>
+                        <td>default 3000.5 kbps</td>
+                        <td>0</td>
+                        <!--            <td>0</td>-->
+                        <td>0</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
+            <script>
+                function generateCSV() {
+                    $('#tbMain').tableExport({
+                        type: 'csv',
+                    });
+                }
+            </script>
+<!--            <div class="col-md-6">-->
+<!--                <div class="p-5 border rounded-3">-->
+<!--                    <h4>Metrics</h4>-->
+<!--                    <div>-->
+<!--                        <strong>Bandwidth:</strong>-->
+<!--                        <span id="bandwidth"></span>-->
+<!--                        <br/>-->
+<!--                        <strong>Reported bitrate:</strong>-->
+<!--                        <span id="reportedBitrate"></span>-->
+<!--                        <br/>-->
+<!--                        <strong>Buffer level:</strong>-->
+<!--                        <span id="bufferLevel"></span>-->
+<!--                        <div id="chrome-only">-->
+<!--                            <strong>Calculated bitrate:</strong>-->
+<!--                            <span id="calculatedBitrate"></span>-->
+<!--                        </div>-->
+<!--                        <strong>Framerate:</strong>-->
+<!--                        <span id="framerate"></span>-->
+
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
         <div class="row">
             <div class="col-md-12">
@@ -142,6 +193,7 @@
         init();
     });
 </script>
-<script src="../highlighter.js"></script>
+
+<!--<script src="./js_files/highlighter.js"></script>-->
 </body>
 </html>
